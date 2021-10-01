@@ -1,0 +1,12 @@
+*.json
+*.jpg
+* .jar
+* .war
+* .nar
+* .ear
+* .zip
+* .tar.gz
+* .rar
+* .class
+* .log
+* .ctxt
