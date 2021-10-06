@@ -6,24 +6,40 @@ const repositorio = require('../repositorios/atendimento')
 
 
 class Atendimentos {
-    adiciona(atendimento,res){
-        const dataCriacao = moment() .format ('YYYY-MM-DD HH:MM:SS')
-        const data = moment (atendimento.data, 'DD/MM/YYYY') .format ('YYYY-MM-DD HH:MM:SS')
+    constructor(){
+
+        this.dataValida = ({data, dataCriacao}) => moment (data).isSameOrAfter(dataCriacao)
+        this.valida = parametros => this.validacoes.filter (campo => {
+            const {nome} = campo
+            const parametro = parametro [nome]
+
+            return !campo.valido(parametro)
+        })
         
-        const dataValida = moment (data).isSameOrAfter(dataCriacao)
-        const clienteValido = atendimento.cliente.length >=5
-        const validacoes = [
+        this.clienteValido = (tamanho) => tamanho >= 5
+    
+         this.validacoes = [
             {
                 nome: 'data',
-                valido: dataValida,
+                valido: this.dataValida,
                 mensagem: 'Data deve ser maior ou igual a data atual'
             },{
                 nome:'cliente', 
-                valido: clienteValido,
+                valido: this.clienteValido,
                 mensagem: 'Cliente deve ter pelo menos cinco caracteres'
             }
         ]
-        const erros = validacoes.filter(campo => !campo.valido)
+    } 
+
+    adiciona(atendimento,res){
+        const dataCriacao = moment().format ('YYYY-MM-DD HH:MM:SS')
+        const data = moment (atendimento.data, 'DD/MM/YYYY') .format ('YYYY-MM-DD HH:MM:SS')
+        
+        const parametros = {
+            data: {data, dataCriacao},
+            cliente: {tamanho: atendimento.cliente.length}
+        }
+        const erros = this.valida(parametros)
         const existemErros = erros.length
 
         if (existemErros){ 
@@ -40,18 +56,10 @@ class Atendimentos {
         }
         
     }
-    lista(res) {
-        const sql = 'SELECT * FROM Atendimentos'
-
-        conexao.query(sql,(erro,resultados) => {
-            if (erro) {
-                res.status(400).json(erro)
-            } else {
-                res.status(200).json(resultados)
-            }
-        })
-
+    lista() {
+       return repositorio.lista()
     }
+
     buscarPorId(id,res){
         const sql = `SELECT * FROM Atendimentos WHERE id = ${id}`
 
